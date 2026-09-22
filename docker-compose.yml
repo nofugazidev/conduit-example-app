@@ -1,5 +1,3 @@
-
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -12,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata_vscode:/var/lib/postgresql/data
+      - pgdata_cond:/var/lib/postgresql/data
 
 volumes:
-  pgdata_vscode:
+  pgdata_cond:

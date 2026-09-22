@@ -14,3 +14,6 @@ services:
 
 volumes:
   pgdata_cond:
+
+
+# app finally connected and working to postgres in docker; 

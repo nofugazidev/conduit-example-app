@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({ User, Tag, Comment }) {
+    static associate({ User, Tag, Comment, Collection, CollectionArticle }) {
       // define association here
 
       // Users
@@ -31,6 +31,16 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "articleId",
         timestamps: false,
       });
+
+      // Collections
+      if (Collection && CollectionArticle) {
+        this.belongsToMany(Collection, {
+          through: CollectionArticle,
+          as: "collections",
+          foreignKey: "articleId",
+          otherKey: "collectionId",
+        });
+      }
     }
 
     toJSON() {

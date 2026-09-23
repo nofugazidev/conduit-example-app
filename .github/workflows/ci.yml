@@ -1,0 +1,81 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test-and-build:
+    name: Test, Build & E2E Verification
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: database_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      CI: true
+      DEV_DB_HOST: 127.0.0.1
+      DEV_DB_PORT: 5432
+      DEV_DB_USERNAME: postgres
+      DEV_DB_PASSWORD: postgres
+      DEV_DB_NAME: database_test
+      TEST_DB_HOST: 127.0.0.1
+      TEST_DB_USERNAME: postgres
+      TEST_DB_PASSWORD: postgres
+      TEST_DB_NAME: database_testing
+      JWT_SECRET: super-secret-jwt-key-for-ci-testing-12345
+      PORT: 3001
+      DEV_PORT: 3001
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Initialize Databases and Run Migrations
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c "CREATE DATABASE database_testing;" || true
+          NODE_ENV=development npm run sqlz -- db:migrate
+          NODE_ENV=test npm run sqlz -- db:migrate
+
+      - name: Run Unit & Integration Tests (Vitest & Supertest)
+        run: npx vitest run
+
+      - name: Build Frontend Production Bundle
+        run: npm run build -w frontend
+
+      - name: Install Playwright Chromium with OS Dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Run End-to-End Tests (Playwright)
+        run: npm run test:e2e
+
+      - name: Upload Playwright Report on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14

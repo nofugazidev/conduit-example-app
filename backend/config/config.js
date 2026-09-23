@@ -1,3 +1,8 @@
+const path = require("path");
+// Load env vars so Sequelize CLI picks them up when run standalone (outside index.js)
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env") }); // root .env
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });    // backend/.env
+
 /** @type {import('sequelize').Options} */
 module.exports = {
   development: {

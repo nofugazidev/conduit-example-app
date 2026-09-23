@@ -22,6 +22,7 @@ function Navbar() {
           {isAuth && (
             <>
               <NavItem text="New Article" icon="ion-compose" url="/editor" />
+              <NavItem text="My Collections" icon="ion-folder" url="/collections" />
               <DropdownMenu />
             </>
           )}

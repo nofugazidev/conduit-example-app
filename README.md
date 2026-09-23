@@ -1,134 +1,170 @@
 # ![RealWorld Example App](logo.png)
 
-> **React / Vite + SWC / Express.js / Sequelize / PostgreSQL codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://realworld.io/) spec and API.**
+> **React 19 / Vite + SWC / Express.js 5 / Sequelize / PostgreSQL 16 codebase implementing the RealWorld specification extended with Private Article Collections.**
 
-This codebase was created to demonstrate a fully fledged fullstack application built with **React / Vite + SWC / Express.js / Sequelize / PostgreSQL** including CRUD operations, authentication, routing, pagination, and more.
-
-**[Demo app](https://conduit-realworld-example-app.fly.dev/)&nbsp;&nbsp;|&nbsp;&nbsp;[With Create React App](https://github.com/TonyMckes/conduit-realworld-example-app/tree/create-react-app)&nbsp;&nbsp;|&nbsp;&nbsp;[Other RealWorld Example Apps](https://codebase.show/projects/realworld?category=fullstack)**
-
-> For more information on how to this works with other frontends/backends, head over to the [RealWorld](https://github.com/gothinkster/realworld) repo.
+This repository contains a full-stack, production-grade implementation of Conduit featuring full CRUD operations, authentication, routing, pagination, automated CI pipelines, and a complete **Private Article Collections** feature with unit, integration, and Playwright end-to-end test suites.
 
 ---
 
-## Getting Started
+## 🌟 Feature Spotlight: Private Article Collections
 
-These instructions will help you install and run the project on your local machine for development and testing.
+The **Private Article Collections** feature allows users to curate, organize, and safeguard custom collections of articles for personalized reading lists.
+
+### Architectural Invariants & Security
+- **Strict Privacy**: Collections are strictly private to their authenticated owner.
+- **Zero Information Leakage**: Cross-user unauthorized access attempts return `404 Not Found` (never `403`) to completely eliminate resource and user enumeration vulnerabilities.
+- **Composite Uniqueness**: Articles cannot be added twice to the same collection (enforced via database composite unique index `(collectionId, articleId)`, returning `422 Unprocessable Entity`).
+- **Safe Cascade Deletion**: Deleting a collection cascades to junction table records (`CollectionArticles`) while leaving parent `Articles` rows completely intact.
+- **Zero N+1 Queries**: Collection listing executes in exactly 2 constant queries using grouped batch count aggregation.
+
+For complete scaling, Redis caching, indexing, and observability architecture, see [**`DESIGN_NOTE.md`**](DESIGN_NOTE.md).
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-
-Before you run the project, make sure that you have the following tools and software installed on your computer:
-
-- Text editor/IDE (e.g., VS Code, Sublime Text, Atom)
 - [Git](https://git-scm.com/downloads)
-- [Node.js](https://nodejs.org/en/download/) `v18.11.0+`
-- [NPM](https://www.npmjs.com/) (usually included with Node.js)
-- SQL database
+- [Node.js](https://nodejs.org/en/download/) `v20.x` or `v22.x`
+- [Docker & Docker Compose](https://docs.docker.com/get-docker/) (for PostgreSQL)
 
-### Installation
+---
 
-To install the project on your computer, follow these steps:
+### Installation & Environment Setup
 
-1. Clone the repository to your local machine.
-
+1. **Clone the repository:**
    ```bash
-   git clone https://github.com/TonyMckes/conduit-realworld-example-app.git
-   ```
-
-2. Navigate to the project directory.
-
-   ```bash
+   git clone <your-repo-url>
    cd conduit-realworld-example-app
    ```
 
-3. Install project dependencies by running the command:
-
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-### Configuration
-
-1. Create a `.env` file in the root directory of the project
-2. Add the required environment variables as specified in the [`.env.example`](backend/.env.example) file
-3. (Optional) update the Sequelize configuration parameters in the [`config.js`](backend/config/config.js) file
-4. If you are **not** using PostgreSQL, you may also have to install the driver for your database:
-
-   <details>
-   <summary>Use one of the following commands to install:</summary><br/>
-
-   > Note: `-w backend` option is used to install it in the backend [`package.json`](backend/package.json).
-
+3. **Start PostgreSQL via Docker Compose:**
    ```bash
-   npm install -w backend pg pg-hstore  # Postgres (already installed)
-   npm install -w backend mysql2
-   npm install -w backend mariadb
-   npm install -w backend sqlite3
-   npm install -w backend tedious       # Microsoft SQL Server
-   npm install -w backend oracledb      # Oracle Database
+   docker-compose up -d
    ```
 
-   > :information_source: Visit [Sequelize - Installing](https://sequelize.org/docs/v6/getting-started/#installing) for more infomation.
-
-   ***
-
-   </details>
-
-5. Create database specified by configuration by executing
-
-   > :warning: Please, make sure you have already created a superuser for your database.
-
+4. **Environment Configuration:**
+   Copy and configure the environment file:
    ```bash
-   npm run sqlz -- db:create
+   cp backend/.env.example backend/.env
+   cp backend/.env.example .env
+   ```
+   Update `.env` (and `backend/.env`) with your database credentials matching the `docker-compose.yml`.
+
+5. **Create the test database** (required for Supertest backend tests):
+   ```bash
+   docker exec -it conduit-postgres psql -U postgres -c "CREATE DATABASE database_testing;"
    ```
 
-   > :information_source: The command `npm run sqlz` is an alias for `npx -w backend sequelize-cli`.  
-   > Execute `npm run sqlz -- --help` to see more of `sequelize-cli` commands availables.
-
-6. Optionally you can run the following command to populate your database with some dummy data:
-
+6. **Run Database Migrations:**
    ```bash
-   npm run sqlz -- db:seed:all
+   # Development database
+   NODE_ENV=development npm run sqlz -- db:migrate
+
+   # Test database
+   NODE_ENV=test npm run sqlz -- db:migrate
    ```
 
-### Usage
+---
 
-#### Development Server
+### Running the Application Locally
 
-To run the project, follow these steps:
+```bash
+npm run dev
+```
 
-1. Start the development server by executing the command:
+- **Frontend Client**: [http://localhost:3000/](http://localhost:3000)
+- **Backend API**: [http://localhost:3001/api](http://localhost:3001/api)
 
-   ```bash
-   npm run dev
-   ```
+---
 
-2. Open a web browser and navigate to:
-   - Home page should be available at [`http://localhost:3000/`](http://localhost:3000).
-   - API endpoints should be available at [`http://localhost:3001/api`](http://localhost:3001/api).
+## 🧪 Testing
 
-#### Running Tests
-
-To run tests, simply run the following command:
-
+### 1. Unit & Integration Tests (Vitest & Supertest)
 ```bash
 npm run test
+# or
+npx vitest run
 ```
 
-#### Production
-
-The following command will build the production version of the app:
-
+### 2. End-to-End Tests (Playwright)
 ```bash
-npm run start
+# Install Chromium (first time only)
+npx playwright install chromium
+
+# Run E2E tests
+npm run test:e2e
 ```
 
-## License
+---
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+## 📡 API Reference: Collections Endpoints
 
-## Acknowledgments
+All collections endpoints require `Authorization: Token <jwt>`.
 
-- [RealWorld](https://realworld.io/)
-- [RealWorld (GitHub)](https://github.com/gothinkster/realworld)
-- [CodebaseShow](https://codebase.show/)
-- [How to write a Good readme](https://bulldogjob.com/news/449-how-to-write-a-good-readme-for-your-github-project)
+| Method | Endpoint | Description | Status Codes |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/collections` | Create a new private collection | `201`, `401`, `422` |
+| `GET` | `/api/collections` | List all private collections owned by user | `200`, `401` |
+| `GET` | `/api/collections/:id` | Get collection details with paginated articles | `200`, `401`, `404` |
+| `PUT` | `/api/collections/:id` | Update collection name or description | `200`, `401`, `404`, `422` |
+| `DELETE` | `/api/collections/:id` | Delete collection (cascades junction rows safely) | `200`, `401`, `404` |
+| `POST` | `/api/collections/:id/articles/:slug` | Add an article to a collection | `201`, `401`, `404`, `422` |
+| `DELETE` | `/api/collections/:id/articles/:slug` | Remove an article from a collection | `200`, `401`, `404` |
+| `GET` | `/api/collections/status/:slug` | Check article membership across user's collections | `200`, `401`, `404` |
+
+---
+
+## ⚙️ Continuous Integration (CI)
+
+A GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and PR to `main`:
+1. Launches PostgreSQL 16 service container.
+2. Runs `npm ci` for clean reproducible install.
+3. Applies migrations for development and test databases.
+4. Runs all Vitest & Supertest tests.
+5. Builds the frontend bundle (`vite build`).
+6. Runs Playwright E2E tests in headless Chromium.
+7. Uploads Playwright report artifact on failure.
+
+---
+
+## ⚠️ Known Limitations
+
+- The Redis caching layer documented in `DESIGN_NOTE.md` is designed but not implemented — all reads hit PostgreSQL directly. This is appropriate for the current data scale but would be the first production investment for high-traffic scenarios.
+- Collection names are not enforced as unique per user at the database level (only application validation). A `UNIQUE(userId, name)` index would be a clean follow-up improvement.
+- The `Article.toJSON()` method strips the numeric `id` field for RealWorld spec compliance. The backend resolves articles by slug in all collection operations to work around this, which adds one extra DB lookup per membership operation.
+
+---
+
+## 🤖 AI Usage
+
+AI coding assistants (Gemini) were used throughout this assessment as part of the development workflow.
+
+**Where AI was used:**
+- Drafting the initial migration schema and Sequelize model associations.
+- Generating boilerplate for frontend service functions and React component scaffolding.
+- Writing the initial Supertest test suite structure.
+- Drafting the `DESIGN_NOTE.md` content.
+
+**Validation approach:** All AI-generated code was reviewed, tested, and in several cases corrected before committing. Every file was verified to work against the real database and browser environment.
+
+**One concrete AI correction:**
+
+> **Architectural Oversight on Vitest JSDOM vs. Supertest Express Testing**
+>
+> During initial implementation of the backend integration test suite, the AI assistant attempted to configure Vitest with a single `environment: 'jsdom'` setting (matching the existing frontend test setup). Supertest's HTTP client collided with jsdom's mock socket layer, causing backend database tests to hang indefinitely or throw stream connection errors rather than making real HTTP calls.
+>
+> **The correction:** I rejected the unified jsdom approach and re-architected `vitest.config.js` into a multi-project configuration — a dedicated `backend` project with `environment: 'node'` targeting `backend/**/*.test.js`, and an isolated `frontend` project with `environment: 'jsdom'` targeting `frontend/**/*.test.{js,jsx}`. I also refactored `backend/index.js` to guard `app.listen()` behind `if (require.main === module)` and export the raw `app` instance. This separation allowed Supertest to bind ephemeral in-process HTTP listeners in a genuine Node environment, resulting in 100% reliable parallel test execution.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+Original project by [TonyMckes](https://github.com/TonyMckes/conduit-realworld-example-app) — all original attribution and license preserved.

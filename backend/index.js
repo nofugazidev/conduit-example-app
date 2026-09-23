@@ -11,6 +11,7 @@ const userRoutes = require("./routes/user");
 const articlesRoutes = require("./routes/articles");
 const profilesRoutes = require("./routes/profiles");
 const tagsRoutes = require("./routes/tags");
+const collectionsRoutes = require("./routes/collections");
 
 const app = express();
 app.use(cors());
@@ -35,11 +36,16 @@ app.use("/api/user", userRoutes);
 app.use("/api/articles", articlesRoutes);
 app.use("/api/profiles", profilesRoutes);
 app.use("/api/tags", tagsRoutes);
+app.use("/api/collections", collectionsRoutes);
 app.get("/*any", (req, res) =>
   res.status(404).json({ errors: { body: ["Not found"] } }),
 );
 app.use(errorHandler);
 
-app.listen(PORT, () =>
-  console.log(`Server running on http://localhost:${PORT}`),
-);
+if (require.main === module) {
+  app.listen(PORT, () =>
+    console.log(`Server running on http://localhost:${PORT}`),
+  );
+}
+
+module.exports = app;

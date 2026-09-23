@@ -26,3 +26,141 @@ button:focus {
   justify-content: center;
   flex-direction: column;
 }
+
+/* Modal Overlay & Dialog */
+.modal-backdrop-custom {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.modal-dialog-custom {
+  background: #ffffff;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header-custom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-title-custom {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #373a3c;
+  margin: 0;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #818a91;
+  cursor: pointer;
+  padding: 0;
+}
+
+.modal-close-btn:hover {
+  color: #373a3c;
+}
+
+.modal-body-custom {
+  padding: 1.25rem;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+.modal-footer-custom {
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  background: #fcfcfc;
+}
+
+/* Collection Card & UI */
+.collection-card {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.collection-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.collection-badge {
+  display: inline-block;
+  background-color: #5cb85c;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 12px;
+}
+
+.collection-empty {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  border: 2px dashed #e0e0e0;
+  border-radius: 10px;
+  margin: 2rem 0;
+  background: #fafafa;
+}
+
+.collection-checkbox-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.collection-checkbox-item:hover {
+  background: #f8f9fa;
+}
+
+.collection-checkbox-item.active {
+  background: #eef7ee;
+  border-color: #5cb85c;
+}

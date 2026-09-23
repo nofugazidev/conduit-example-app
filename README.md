@@ -150,6 +150,7 @@ AI coding assistants (Gemini) were used throughout this assessment as part of th
 - Generating boilerplate for frontend service functions and React component scaffolding.
 - Writing the initial Supertest test suite structure.
 - Drafting the `DESIGN_NOTE.md` content.
+- Antigravity Gemini code assistant was used and the occasional promptingi of Claude especially at the beginning of the project to go through it and explain
 
 **Validation approach:** All AI-generated code was reviewed, tested, and in several cases corrected before committing. Every file was verified to work against the real database and browser environment.
 
@@ -167,4 +168,4 @@ AI coding assistants (Gemini) were used throughout this assessment as part of th
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
-Original project by [TonyMckes](https://github.com/TonyMckes/conduit-realworld-example-app) — all original attribution and license preserved.
+Original project by [TonyMckes](https://github.com/TonyMckes/conduit-realworld-example-app) — all original attribution and license preserved. and the link to my own repo which contains this version is [nofugazidev](https://github.com/nofugazidev/conduit-example-app)
